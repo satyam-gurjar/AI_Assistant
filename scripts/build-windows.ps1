@@ -30,14 +30,42 @@ if (Test-Path "dist") { Remove-Item -Recurse -Force dist }
 Write-Host "Building executable..." -ForegroundColor Yellow
 pyinstaller AIAssistant.spec
 
-# Create distribution package
-Write-Host "Creating distribution package..." -ForegroundColor Yellow
-Set-Location dist
-Compress-Archive -Path AIAssistant.exe -DestinationPath AIAssistant-windows-x64.zip -Force
-Set-Location ..
+# Create distribution directory
+Write-Host "Creating distribution directory..." -ForegroundColor Yellow
+New-Item -ItemType Directory -Force -Path dist\AIAssistant-windows-x64 | Out-Null
 
-# Copy .env.example to dist
-Copy-Item .env.example dist\.env.example
+# Copy executable to distribution directory
+Copy-Item dist\AIAssistant.exe dist\AIAssistant-windows-x64\
+
+# Copy .env.example to distribution directory
+Copy-Item .env.example dist\AIAssistant-windows-x64\.env.example
+
+# Create README in dist
+@"
+AI Assistant - Windows x64
+==========================
+
+Setup Instructions:
+1. Copy .env.example to .env
+2. Edit .env and set your API_BASE_URL
+3. Run: AIAssistant.exe
+
+Configuration:
+Edit .env file to customize:
+- API_BASE_URL: Your AI server URL
+- API_KEY: Your API key (if required)
+- TTS_RATE: Speech rate (default: 150)
+- TTS_VOLUME: Speech volume (default: 0.9)
+
+For more information, visit:
+https://github.com/yourusername/yourrepo
+"@ | Out-File -FilePath dist\AIAssistant-windows-x64\README.txt -Encoding UTF8
+
+# Create distribution package
+Write-Host "Creating zip file..." -ForegroundColor Yellow
+Set-Location dist
+Compress-Archive -Path AIAssistant-windows-x64 -DestinationPath AIAssistant-windows-x64.zip -Force
+Set-Location ..
 
 Write-Host "==========================================" -ForegroundColor Green
 Write-Host "Build complete!" -ForegroundColor Green

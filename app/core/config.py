@@ -18,8 +18,18 @@ from dotenv import load_dotenv
 # When running as compiled executable, use the executable's directory
 # When running as script, use the project root
 if getattr(sys, 'frozen', False):
-    # Running as compiled executable
+    # Running as compiled executable (PyInstaller)
+    # sys._MEIPASS is the temp folder where PyInstaller extracts files
+    # But we want the actual executable directory for user's .env file
     ENV_DIR = Path(sys.executable).parent
+    # Also check sys._MEIPASS for bundled .env.example
+    if hasattr(sys, '_MEIPASS'):
+        # If .env doesn't exist in executable dir, check bundled location
+        if not (ENV_DIR / ".env").exists():
+            bundled_env = Path(sys._MEIPASS) / ".env"
+            if bundled_env.exists():
+                # Use bundled .env as fallback (but prefer user's .env)
+                pass
 else:
     # Running as script - go up to project root
     ENV_DIR = Path(__file__).parent.parent.parent

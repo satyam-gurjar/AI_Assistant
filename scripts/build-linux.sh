@@ -32,14 +32,42 @@ rm -rf build dist
 echo "Building executable..."
 pyinstaller AIAssistant.spec
 
-# Create distribution package
-echo "Creating distribution package..."
-cd dist
-tar -czf AIAssistant-linux-x64.tar.gz AIAssistant
-cd ..
+# Create distribution directory
+echo "Creating distribution directory..."
+mkdir -p dist/AIAssistant-linux-x64
 
-# Copy .env.example to dist
-cp .env.example dist/.env.example
+# Copy executable to distribution directory
+cp dist/AIAssistant dist/AIAssistant-linux-x64/
+
+# Copy .env.example to distribution directory
+cp .env.example dist/AIAssistant-linux-x64/.env.example
+
+# Create README in dist
+cat > dist/AIAssistant-linux-x64/README.txt << 'EOF'
+AI Assistant - Linux x64
+========================
+
+Setup Instructions:
+1. Copy .env.example to .env
+2. Edit .env and set your API_BASE_URL
+3. Run: ./AIAssistant
+
+Configuration:
+Edit .env file to customize:
+- API_BASE_URL: Your AI server URL
+- API_KEY: Your API key (if required)
+- TTS_RATE: Speech rate (default: 150)
+- TTS_VOLUME: Speech volume (default: 0.9)
+
+For more information, visit:
+https://github.com/yourusername/yourrepo
+EOF
+
+# Create distribution package
+echo "Creating tarball..."
+cd dist
+tar -czf AIAssistant-linux-x64.tar.gz AIAssistant-linux-x64
+cd ..
 
 echo "=========================================="
 echo "Build complete!"

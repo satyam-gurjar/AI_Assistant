@@ -123,11 +123,11 @@ def setup_qt_settings():
     """
     # Enable high DPI scaling (for 4K monitors, etc.)
     # This makes the UI look crisp on high-resolution displays
+    # Note: AA_EnableHighDpiScaling and AA_UseHighDpiPixmaps are deprecated in Qt 6
+    # High DPI is enabled by default in Qt 6
     QApplication.setHighDpiScaleFactorRoundingPolicy(
         Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
     )
-    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
-    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
 
 
 def check_env_file():
@@ -226,7 +226,6 @@ def main():
             logger = logging.getLogger(__name__)
             logger.exception(f"Fatal error during application startup: {e}")
         except:
-            import sys
             print(f"FATAL ERROR: {e}", file=sys.stderr)
             import traceback
             traceback.print_exc()

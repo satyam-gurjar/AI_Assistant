@@ -17,8 +17,10 @@ a = Analysis(
     pathex=[str(project_root)],
     binaries=[],
     datas=[
-        # Include .env.example (but NOT .env - that contains secrets)
+        # Include .env.example as template
         ('.env.example', '.'),
+        # Include .env if it exists (for testing, user will create their own)
+        # ('.env', '.'),  # Uncomment for testing
     ],
     hiddenimports=[
         'PySide6.QtCore',
@@ -70,7 +72,7 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,  # No console window (GUI application)
+    console=True,  # Show console for debugging (set to False for production)
     disable_windowed_traceback=False,
     argv_emulation=False,  # macOS: Don't emulate argv
     target_arch=None,

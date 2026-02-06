@@ -119,25 +119,40 @@ jobs:
             ## AI Assistant Release ${{ github.ref_name }}
             
             ### Download for your platform:
-            - **Windows**: AIAssistant-windows-x64.zip
-            - **Linux**: AIAssistant-linux-x64.tar.gz
-            - **macOS**: AIAssistant-macos-x64.zip
+            - **Windows**: `AIAssistant-windows-x64.zip` (Extract and run AIAssistant.exe)
+            - **Linux**: `AIAssistant-linux-x64.tar.gz` (Extract and run ./AIAssistant)
+            - **macOS**: `AIAssistant-macos-x64.zip` (Extract and open AIAssistant.app)
             
-            ### Setup Instructions:
-            1. Download the package for your operating system
-            2. Extract the archive
-            3. Copy `.env.example` to `.env` in the same directory
-            4. Edit `.env` and set your `API_BASE_URL` to your AI server
-            5. Run the application
+            ### Quick Start:
+            1. Download and extract the package for your operating system
+            2. (Optional) Copy `.env.example` to `.env` to customize settings
+            3. Run the application - it works with default settings!
             
-            ### Configuration:
-            Edit the `.env` file to change:
-            - API server URL
-            - API authentication
-            - Timeout settings
-            - Voice settings
+            ### Default Configuration:
+            - API Server: `http://localhost:5000/api` (change in .env if needed)
+            - No API key required by default
+            - All settings can be customized via .env file
             
-            For more information, see the [README](https://github.com/${{ github.repository }}/blob/main/README.md).
+            ### Advanced Configuration:
+            Create a `.env` file in the same directory as the executable to customize:
+            - `API_BASE_URL`: Your AI server URL
+            - `API_KEY`: Your API key (if authentication required)
+            - `TTS_RATE`: Speech rate (default: 150)
+            - `TTS_VOLUME`: Speech volume (0.0-1.0, default: 0.9)
+            - `DEBUG_MODE`: Enable debug logging (true/false)
+            
+            ### Package Contents:
+            Each download includes:
+            - Application executable
+            - `.env.example` template file
+            - README.txt with setup instructions
+            
+            ### Troubleshooting:
+            - **Linux**: If permission denied, run `chmod +x AIAssistant`
+            - **macOS**: Right-click and select "Open" to bypass security warnings
+            - **Windows**: If Windows Defender blocks it, click "More info" → "Run anyway"
+            
+            For detailed documentation, see the [README](https://github.com/${{ github.repository }}/blob/main/README.md).
           draft: false
           prerelease: false
         env:
