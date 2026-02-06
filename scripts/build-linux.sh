@@ -30,7 +30,7 @@ rm -rf build dist
 
 # Build with PyInstaller
 echo "Building executable..."
-pyinstaller AIAssistant.production.spec
+pyinstaller AIAssistant.spec
 
 # Create distribution package
 echo "Creating distribution package..."

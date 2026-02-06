@@ -28,7 +28,7 @@ if (Test-Path "dist") { Remove-Item -Recurse -Force dist }
 
 # Build with PyInstaller
 Write-Host "Building executable..." -ForegroundColor Yellow
-pyinstaller AIAssistant.production.spec
+pyinstaller AIAssistant.spec
 
 # Create distribution package
 Write-Host "Creating distribution package..." -ForegroundColor Yellow

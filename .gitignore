@@ -17,7 +17,6 @@ ENV/
 # PyInstaller
 build/
 dist/
-*.spec
 
 # Logs
 logs/
