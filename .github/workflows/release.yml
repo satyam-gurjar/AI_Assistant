@@ -115,16 +115,19 @@ jobs:
       - name: Package Windows build
         run: |
           cd ./artifacts/windows-build
+          cp ../../.env.example ./ || echo "Warning: .env.example not found"
           zip -r ../../AIAssistant-windows-x64.zip AIAssistant.exe .env.example
 
       - name: Package Linux build
         run: |
           cd ./artifacts/linux-build
+          cp ../../.env.example ./ || echo "Warning: .env.example not found"
           tar -czf ../../AIAssistant-linux-x64.tar.gz AIAssistant .env.example
 
       - name: Package macOS build
         run: |
           cd ./artifacts/macos-build
+          cp ../../.env.example ./ || echo "Warning: .env.example not found"
           if [ -d "AIAssistant.app" ]; then
             zip -r ../../AIAssistant-macos-x64.zip AIAssistant.app .env.example
           else
