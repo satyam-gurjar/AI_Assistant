@@ -191,27 +191,29 @@ def main():
     Main application function.
     
     This is the entry point that:
-    1. Sets up logging
-    2. Validates configuration
-    3. Creates Qt application
-    4. Creates main window and controller
-    5. Shows the window
-    6. Starts the event loop
-    7. Cleans up on exit
+    1. Checks for .env file
+    2. Sets up logging
+    3. Validates configuration
+    4. Creates Qt application
+    5. Creates main window and controller
+    6. Shows the window
+    7. Starts the event loop
+    8. Cleans up on exit
     
     Returns:
         int: Exit code (0 for success, non-zero for error)
     """
-    # Set up logging first (so all subsequent logs work)
-    setup_logging()
-    
-    logger = logging.getLogger(__name__)
-    
     try:
-        # Check if .env file exists before proceeding
+        # Check if .env file exists BEFORE setting up logging
+        # (logging setup needs Config which needs .env)
         if not check_env_file():
-            logger.error(".env file not found - application cannot start")
+            # No logger available yet, just exit
             return 1
+        
+        # Set up logging (now .env is loaded)
+        setup_logging()
+        
+        logger = logging.getLogger(__name__)
         
         # Validate configuration
         validate_configuration()
@@ -266,7 +268,28 @@ def main():
     
     except Exception as e:
         # Catch any unexpected errors during startup
-        logger.exception(f"Fatal error during application startup: {e}")
+        # Try to log it if logger exists, otherwise print to stderr
+        try:
+            logger = logging.getLogger(__name__)
+            logger.exception(f"Fatal error during application startup: {e}")
+        except:
+            import sys
+            print(f"FATAL ERROR: {e}", file=sys.stderr)
+            import traceback
+            traceback.print_exc()
+        
+        # Show error dialog to user
+        try:
+            app = QApplication.instance() or QApplication(sys.argv)
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setWindowTitle("Application Error")
+            msg.setText("AI Assistant failed to start!")
+            msg.setInformativeText(f"Error: {str(e)}\n\nCheck logs/ai_assistant.log for details.")
+            msg.exec()
+        except:
+            pass
+        
         return 1
 
 

@@ -9,12 +9,23 @@ Never hardcode sensitive data in this file.
 """
 
 import os
+import sys
 from typing import Optional
 from pathlib import Path
 from dotenv import load_dotenv
 
+# Determine the correct directory for .env file
+# When running as compiled executable, use the executable's directory
+# When running as script, use the project root
+if getattr(sys, 'frozen', False):
+    # Running as compiled executable
+    ENV_DIR = Path(sys.executable).parent
+else:
+    # Running as script - go up to project root
+    ENV_DIR = Path(__file__).parent.parent.parent
+
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv(dotenv_path=ENV_DIR / ".env")
 
 
 class Config:
@@ -54,7 +65,8 @@ class Config:
     
     # ========== LOGGING CONFIGURATION ==========
     DEBUG_MODE: bool = os.getenv("DEBUG_MODE", "false").lower() == "true"
-    LOG_DIR: Path = Path(__file__).parent.parent.parent / "logs"
+    # Use the same directory as the executable/script for logs
+    LOG_DIR: Path = ENV_DIR / "logs"
     LOG_FILE: str = "ai_assistant.log"
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     
