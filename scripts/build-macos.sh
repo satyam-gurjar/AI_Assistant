@@ -32,8 +32,9 @@ rm -rf build dist
 echo "Building application..."
 pyinstaller AIAssistant.spec
 
-# Copy .env.example to dist
+# Copy .env.example and README to dist
 cp .env.example dist/.env.example
+cp README.txt dist/README.txt
 
 echo "=========================================="
 echo "Build complete!"

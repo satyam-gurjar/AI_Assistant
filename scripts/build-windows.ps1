@@ -30,8 +30,9 @@ if (Test-Path "dist") { Remove-Item -Recurse -Force dist }
 Write-Host "Building executable..." -ForegroundColor Yellow
 pyinstaller AIAssistant.spec
 
-# Copy .env.example to dist
+# Copy .env.example and README to dist
 Copy-Item .env.example dist\.env.example
+Copy-Item README.txt dist\README.txt
 
 Write-Host "=========================================" -ForegroundColor Green
 Write-Host "Build complete!" -ForegroundColor Green

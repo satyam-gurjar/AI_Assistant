@@ -26,7 +26,7 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QMessageBox
 from PySide6.QtCore import Qt
 
 from app.core.config import Config
@@ -130,6 +130,62 @@ def setup_qt_settings():
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
 
 
+def check_env_file():
+    """
+    Check if .env file exists and guide user to set it up.
+    
+    Returns:
+        bool: True if .env exists, False otherwise
+    """
+    # Determine the directory where the executable is located
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable
+        app_dir = Path(sys.executable).parent
+    else:
+        # Running as script
+        app_dir = Path(__file__).parent.parent
+    
+    env_file = app_dir / ".env"
+    env_example = app_dir / ".env.example"
+    
+    if not env_file.exists():
+        # Create a minimal Qt app just to show the error dialog
+        app = QApplication.instance() or QApplication(sys.argv)
+        
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setWindowTitle("Configuration Required")
+        msg.setText("AI Assistant is not configured yet!")
+        
+        instructions = (
+            f"<p><b>Please configure the application before running:</b></p>"
+            f"<ol>"
+            f"<li>Find the file: <code>.env.example</code></li>"
+            f"<li>Rename it to: <code>.env</code></li>"
+            f"<li>Edit <code>.env</code> and set your API server URL</li>"
+            f"<li>Run AI Assistant again</li>"
+            f"</ol>"
+            f"<p><b>File location:</b><br><code>{app_dir}</code></p>"
+        )
+        
+        if env_example.exists():
+            instructions += f"<p>✅ <code>.env.example</code> found - just rename it!</p>"
+        else:
+            instructions += (
+                f"<p>⚠️ <code>.env.example</code> not found.<br>"
+                f"Create a file named <code>.env</code> with:<br>"
+                f"<code>API_BASE_URL=http://your-server:5000/api</code></p>"
+            )
+        
+        msg.setInformativeText(instructions)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec()
+        
+        return False
+    
+    return True
+
+
 def main():
     """
     Main application function.
@@ -152,6 +208,11 @@ def main():
     logger = logging.getLogger(__name__)
     
     try:
+        # Check if .env file exists before proceeding
+        if not check_env_file():
+            logger.error(".env file not found - application cannot start")
+            return 1
+        
         # Validate configuration
         validate_configuration()
         
