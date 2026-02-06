@@ -17,6 +17,7 @@ class TextToSpeech:
         self.speaking = False
         self.speech_queue = queue.Queue()
         self.worker_thread = None
+        self._stop_requested = False
         self._initialize_engine()
         
     def _initialize_engine(self):
@@ -69,14 +70,16 @@ class TextToSpeech:
             
     def _speech_worker(self):
         """Worker thread that processes speech queue"""
-        while not self.speech_queue.empty():
+        while not self.speech_queue.empty() and not self._stop_requested:
             try:
                 text = self.speech_queue.get(timeout=0.1)
-                self._speak_sync(text)
+                if not self._stop_requested:
+                    self._speak_sync(text)
             except queue.Empty:
                 break
             except Exception as e:
                 print(f"✗ TTS worker error: {e}")
+        self._stop_requested = False
                 
     def _speak_sync(self, text: str):
         """Synchronously speak text (blocking)"""
@@ -94,16 +97,24 @@ class TextToSpeech:
             
     def stop(self):
         """Stop speaking immediately"""
+        print("⏹ Stopping TTS...")
+        self._stop_requested = True
+        self.speaking = False
+        
+        # Clear the queue first
+        while not self.speech_queue.empty():
+            try:
+                self.speech_queue.get_nowait()
+            except queue.Empty:
+                break
+        
+        # Force stop the engine
         if self.engine:
             try:
                 self.engine.stop()
-                self.speaking = False
-                # Clear the queue
-                while not self.speech_queue.empty():
-                    try:
-                        self.speech_queue.get_nowait()
-                    except queue.Empty:
-                        break
+                # Give engine time to stop
+                import time
+                time.sleep(0.1)
             except Exception as e:
                 print(f"✗ TTS stop error: {e}")
                 
@@ -143,9 +154,22 @@ class TextToSpeech:
                 
     def cleanup(self):
         """Clean up resources"""
+        print("🧹 Cleaning up TTS engine...")
+        self._stop_requested = True
+        self.enabled = False
         self.stop()
+        
+        # Wait for worker thread to finish
+        if self.worker_thread and self.worker_thread.is_alive():
+            self.worker_thread.join(timeout=1.0)
+        
+        # Destroy engine
         if self.engine:
             try:
                 self.engine.stop()
+                del self.engine
+                self.engine = None
             except:
                 pass
+        
+        print("✓ TTS cleanup complete")

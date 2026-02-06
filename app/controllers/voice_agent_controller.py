@@ -83,6 +83,7 @@ class VoiceAgentController(QObject):
         # Voice button signals
         self.window.voice_input_started.connect(self._on_voice_start)
         self.window.voice_input_stopped.connect(self._on_voice_stop)
+        self.window.stop_all_requested.connect(self._on_stop_all)
         
         # Text chat signal
         self.window.text_message_sent.connect(self._on_text_message)
@@ -273,6 +274,18 @@ class VoiceAgentController(QObject):
         self.tts.set_enabled(enabled)
         if not enabled:
             self.tts.stop()
+    
+    @Slot()
+    def _on_stop_all(self):
+        """Handle stop button - stops both voice input and TTS."""
+        logger.info("Stop all requested")
+        
+        # Stop voice input
+        if self.voice_handler.is_available():
+            self.voice_handler.stop_recording()
+        
+        # Stop TTS immediately
+        self.tts.stop()
     
     def _on_disconnect_requested(self):
         """

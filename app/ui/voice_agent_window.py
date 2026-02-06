@@ -152,6 +152,7 @@ class VoiceAgentWindow(QMainWindow):
     text_message_sent = Signal(str)
     disconnect_requested = Signal()
     tts_toggled = Signal(bool)
+    stop_all_requested = Signal()  # Stop both voice and TTS
 
     def __init__(self):
         super().__init__()
@@ -484,15 +485,19 @@ class VoiceAgentWindow(QMainWindow):
         logger.info("Continuous voice listening started")
     
     def _on_stop_voice(self):
-        """Handle Stop button click - ends continuous listening"""
+        """Handle Stop button click - ends continuous listening and stops TTS"""
         self.is_recording = False
         self.start_btn.setEnabled(True)
         self.stop_btn.setEnabled(False)
         self.listening_indicator.setText("⚫ Ready")
         self.listening_indicator.setStyleSheet("color:#666;font-size:9pt;")
+        
+        # Emit both signals
         self.voice_input_stopped.emit()
-        self.add_agent_message("Listening stopped.")
-        logger.info("Continuous voice listening stopped")
+        self.stop_all_requested.emit()  # Also stop TTS
+        
+        self.add_agent_message("Stopped.")
+        logger.info("Stop button clicked - stopping voice and TTS")
     
     def _on_tts_toggle(self):
         """Handle TTS toggle button"""
@@ -506,8 +511,15 @@ class VoiceAgentWindow(QMainWindow):
     # --------------------------------------------------
     def closeEvent(self, event):
         """Cleanup resources on close"""
+        logger.info("Window closing - cleaning up resources")
         self.clock_timer.stop()
         self._stop_camera()
+        
+        # Emit signals to stop everything
+        if self.is_recording:
+            self.voice_input_stopped.emit()
+        self.stop_all_requested.emit()  # Stop TTS before closing
+        
         super().closeEvent(event)
     
     # --------------------------------------------------
