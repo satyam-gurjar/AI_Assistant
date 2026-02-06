@@ -1,0 +1,41 @@
+# Core dependencies for AI Assistant Desktop Application
+# Python 3.9+ required (compatible with Python 3.13+)
+
+# PySide6: Qt for Python - UI framework
+# Provides modern cross-platform GUI components
+# Updated to latest version compatible with Python 3.13+
+PySide6>=6.8.0
+
+# Requests: HTTP library for REST API calls
+# Used to communicate with backend AI APIs
+requests>=2.31.0
+
+# Python-dotenv: Load environment variables from .env file
+# Useful for storing API keys and configuration securely
+python-dotenv>=1.0.0
+
+# PyInstaller: Package application into executable
+# Use this to build standalone .exe files
+pyinstaller>=6.3.0
+
+# Speech Recognition: For voice input
+SpeechRecognition>=3.10.0
+
+# PyAudio: For microphone access (voice recording)
+PyAudio>=0.2.13
+
+# pyttsx3: Text-to-speech library (offline voice output)
+pyttsx3>=2.90
+
+# NumPy: For audio processing and visualization
+numpy>=1.24.0
+
+# OpenCV: For camera capture and video processing
+opencv-python>=4.8.0
+
+# Additional useful packages
+# Certifi: SSL certificate verification
+certifi>=2023.11.17
+
+# Urllib3: HTTP client (dependency of requests)
+urllib3>=2.1.0

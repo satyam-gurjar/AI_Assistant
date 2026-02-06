@@ -1,0 +1,141 @@
+name: Build and Release AI Assistant
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: AIAssistant-linux-x64.tar.gz
+            build_script: scripts/build-linux.sh
+          - os: windows-latest
+            artifact_name: AIAssistant-windows-x64.zip
+            build_script: scripts/build-windows.ps1
+          - os: macos-latest
+            artifact_name: AIAssistant-macos-x64.zip
+            build_script: scripts/build-macos.sh
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      # ✅ NEW: Cache PyInstaller (faster builds)
+      - name: Cache PyInstaller
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pyinstaller
+          key: ${{ runner.os }}-pyinstaller
+
+      - name: Install system dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libxcb-xinerama0 \
+            libxcb-cursor0 \
+            libxkbcommon-x11-0 \
+            libdbus-1-3 \
+            portaudio19-dev \
+            python3-pyaudio \
+            patchelf   # ✅ NEW: Improves PyInstaller portability
+
+      - name: Install system dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install portaudio
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build application (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          chmod +x ${{ matrix.build_script }}
+          bash ${{ matrix.build_script }}
+
+      - name: Build application (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          powershell -ExecutionPolicy Bypass -File ${{ matrix.build_script }}
+
+      # ✅ NEW: Verify build output (helps debugging CI failures)
+      - name: Verify build output
+        run: |
+          ls -R dist
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: dist/${{ matrix.artifact_name }}
+          retention-days: 90
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R ./artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ./artifacts/**/*.tar.gz
+            ./artifacts/**/*.zip
+          body: |
+            ## AI Assistant Release ${{ github.ref_name }}
+            
+            ### Download for your platform:
+            - **Windows**: AIAssistant-windows-x64.zip
+            - **Linux**: AIAssistant-linux-x64.tar.gz
+            - **macOS**: AIAssistant-macos-x64.zip
+            
+            ### Setup Instructions:
+            1. Download the package for your operating system
+            2. Extract the archive
+            3. Copy `.env.example` to `.env` in the same directory
+            4. Edit `.env` and set your `API_BASE_URL` to your AI server
+            5. Run the application
+            
+            ### Configuration:
+            Edit the `.env` file to change:
+            - API server URL
+            - API authentication
+            - Timeout settings
+            - Voice settings
+            
+            For more information, see the [README](https://github.com/${{ github.repository }}/blob/main/README.md).
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
