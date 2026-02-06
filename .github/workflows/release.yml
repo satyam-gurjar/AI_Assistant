@@ -18,14 +18,17 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            artifact_name: AIAssistant-linux-x64.tar.gz
+            artifact_name: linux-build
             build_script: scripts/build-linux.sh
+            executable: AIAssistant
           - os: windows-latest
-            artifact_name: AIAssistant-windows-x64.zip
+            artifact_name: windows-build
             build_script: scripts/build-windows.ps1
+            executable: AIAssistant.exe
           - os: macos-latest
-            artifact_name: AIAssistant-macos-x64.zip
+            artifact_name: macos-build
             build_script: scripts/build-macos.sh
+            executable: AIAssistant.app
 
     steps:
       - name: Checkout code
@@ -88,7 +91,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
-          path: dist/${{ matrix.artifact_name }}
+          path: dist/
           retention-days: 90
 
   release:
@@ -109,12 +112,32 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R ./artifacts
 
+      - name: Package Windows build
+        run: |
+          cd ./artifacts/windows-build
+          zip -r ../../AIAssistant-windows-x64.zip AIAssistant.exe .env.example
+
+      - name: Package Linux build
+        run: |
+          cd ./artifacts/linux-build
+          tar -czf ../../AIAssistant-linux-x64.tar.gz AIAssistant .env.example
+
+      - name: Package macOS build
+        run: |
+          cd ./artifacts/macos-build
+          if [ -d "AIAssistant.app" ]; then
+            zip -r ../../AIAssistant-macos-x64.zip AIAssistant.app .env.example
+          else
+            zip -r ../../AIAssistant-macos-x64.zip AIAssistant .env.example
+          fi
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            ./artifacts/**/*.tar.gz
-            ./artifacts/**/*.zip
+            AIAssistant-windows-x64.zip
+            AIAssistant-linux-x64.tar.gz
+            AIAssistant-macos-x64.zip
           body: |
             ## AI Assistant Release ${{ github.ref_name }}
             

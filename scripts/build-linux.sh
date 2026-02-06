@@ -32,18 +32,12 @@ rm -rf build dist
 echo "Building executable..."
 pyinstaller AIAssistant.spec
 
-# Create distribution package
-echo "Creating distribution package..."
-cd dist
-tar -czf AIAssistant-linux-x64.tar.gz AIAssistant
-cd ..
-
 # Copy .env.example to dist
 cp .env.example dist/.env.example
 
 echo "=========================================="
 echo "Build complete!"
-echo "Package: dist/AIAssistant-linux-x64.tar.gz"
+echo "Executable: dist/AIAssistant"
 echo "=========================================="
 echo ""
 echo "To run the application:"

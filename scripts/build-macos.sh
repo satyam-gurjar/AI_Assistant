@@ -32,24 +32,16 @@ rm -rf build dist
 echo "Building application..."
 pyinstaller AIAssistant.spec
 
-# Create distribution package
-echo "Creating distribution package..."
-cd dist
-# For macOS, we can create a DMG or just zip the .app bundle
-if [ -d "AIAssistant.app" ]; then
-    zip -r AIAssistant-macos-x64.zip AIAssistant.app
-else
-    # If not .app bundle, zip the executable
-    zip AIAssistant-macos-x64.zip AIAssistant
-fi
-cd ..
-
 # Copy .env.example to dist
 cp .env.example dist/.env.example
 
 echo "=========================================="
 echo "Build complete!"
-echo "Package: dist/AIAssistant-macos-x64.zip"
+if [ -d "dist/AIAssistant.app" ]; then
+    echo "Application: dist/AIAssistant.app"
+else
+    echo "Executable: dist/AIAssistant"
+fi
 echo "=========================================="
 echo ""
 echo "To run the application:"
