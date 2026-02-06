@@ -30,13 +30,18 @@ if (Test-Path "dist") { Remove-Item -Recurse -Force dist }
 Write-Host "Building executable..." -ForegroundColor Yellow
 pyinstaller AIAssistant.spec
 
-# Copy .env.example and README to dist
-Copy-Item .env.example dist\.env.example
-Copy-Item README.txt dist\README.txt
+# Create distribution package
+Write-Host "Creating distribution package..." -ForegroundColor Yellow
+Set-Location dist
+Compress-Archive -Path AIAssistant.exe -DestinationPath AIAssistant-windows-x64.zip -Force
+Set-Location ..
 
-Write-Host "=========================================" -ForegroundColor Green
+# Copy .env.example to dist
+Copy-Item .env.example dist\.env.example
+
+Write-Host "==========================================" -ForegroundColor Green
 Write-Host "Build complete!" -ForegroundColor Green
-Write-Host "Executable: dist\AIAssistant.exe" -ForegroundColor Green
+Write-Host "Package: dist\AIAssistant-windows-x64.zip" -ForegroundColor Green
 Write-Host "==========================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "To run the application:" -ForegroundColor Cyan

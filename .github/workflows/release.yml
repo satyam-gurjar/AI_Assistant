@@ -18,17 +18,14 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            artifact_name: linux-build
+            artifact_name: AIAssistant-linux-x64.tar.gz
             build_script: scripts/build-linux.sh
-            executable: AIAssistant
           - os: windows-latest
-            artifact_name: windows-build
+            artifact_name: AIAssistant-windows-x64.zip
             build_script: scripts/build-windows.ps1
-            executable: AIAssistant.exe
           - os: macos-latest
-            artifact_name: macos-build
+            artifact_name: AIAssistant-macos-x64.zip
             build_script: scripts/build-macos.sh
-            executable: AIAssistant.app
 
     steps:
       - name: Checkout code
@@ -91,7 +88,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
-          path: dist/
+          path: dist/${{ matrix.artifact_name }}
           retention-days: 90
 
   release:
@@ -112,38 +109,12 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R ./artifacts
 
-      - name: Package Windows build
-        run: |
-          cd ./artifacts/windows-build
-          cp ../../.env.example ./ || echo "Warning: .env.example not found"
-          cp ../../README.txt ./ || echo "Warning: README.txt not found"
-          zip -r ../../AIAssistant-windows-x64.zip AIAssistant.exe .env.example README.txt
-
-      - name: Package Linux build
-        run: |
-          cd ./artifacts/linux-build
-          cp ../../.env.example ./ || echo "Warning: .env.example not found"
-          cp ../../README.txt ./ || echo "Warning: README.txt not found"
-          tar -czf ../../AIAssistant-linux-x64.tar.gz AIAssistant .env.example README.txt
-
-      - name: Package macOS build
-        run: |
-          cd ./artifacts/macos-build
-          cp ../../.env.example ./ || echo "Warning: .env.example not found"
-          cp ../../README.txt ./ || echo "Warning: README.txt not found"
-          if [ -d "AIAssistant.app" ]; then
-            zip -r ../../AIAssistant-macos-x64.zip AIAssistant.app .env.example README.txt
-          else
-            zip -r ../../AIAssistant-macos-x64.zip AIAssistant .env.example README.txt
-          fi
-
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            AIAssistant-windows-x64.zip
-            AIAssistant-linux-x64.tar.gz
-            AIAssistant-macos-x64.zip
+            ./artifacts/**/*.tar.gz
+            ./artifacts/**/*.zip
           body: |
             ## AI Assistant Release ${{ github.ref_name }}
             
