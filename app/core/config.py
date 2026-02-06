@@ -31,11 +31,13 @@ load_dotenv(dotenv_path=ENV_DIR / ".env")
 class Config:
     """
     Central configuration class for the AI Assistant application.
-    All settings are loaded from .env file for easy configuration changes.
+    Settings can be customized via .env file (optional).
+    Default values are hardcoded for immediate use.
     """
     
     # ========== API CONFIGURATION ==========
-    # Your backend AI API server URL (loaded from .env)
+    # Your backend AI API server URL
+    # Default: http://localhost:5000/api (can be changed in .env file)
     API_BASE_URL: str = os.getenv("API_BASE_URL", "http://localhost:5000/api")
     
     # Specific API endpoints (relative to API_BASE_URL)

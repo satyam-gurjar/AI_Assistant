@@ -132,57 +132,14 @@ def setup_qt_settings():
 
 def check_env_file():
     """
-    Check if .env file exists and guide user to set it up.
+    Check if .env file exists (optional info only).
+    App works without .env using hardcoded defaults.
     
     Returns:
-        bool: True if .env exists, False otherwise
+        bool: True always (doesn't block startup)
     """
-    # Determine the directory where the executable is located
-    if getattr(sys, 'frozen', False):
-        # Running as compiled executable
-        app_dir = Path(sys.executable).parent
-    else:
-        # Running as script
-        app_dir = Path(__file__).parent.parent
-    
-    env_file = app_dir / ".env"
-    env_example = app_dir / ".env.example"
-    
-    if not env_file.exists():
-        # Create a minimal Qt app just to show the error dialog
-        app = QApplication.instance() or QApplication(sys.argv)
-        
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Critical)
-        msg.setWindowTitle("Configuration Required")
-        msg.setText("AI Assistant is not configured yet!")
-        
-        instructions = (
-            f"<p><b>Please configure the application before running:</b></p>"
-            f"<ol>"
-            f"<li>Find the file: <code>.env.example</code></li>"
-            f"<li>Rename it to: <code>.env</code></li>"
-            f"<li>Edit <code>.env</code> and set your API server URL</li>"
-            f"<li>Run AI Assistant again</li>"
-            f"</ol>"
-            f"<p><b>File location:</b><br><code>{app_dir}</code></p>"
-        )
-        
-        if env_example.exists():
-            instructions += f"<p>✅ <code>.env.example</code> found - just rename it!</p>"
-        else:
-            instructions += (
-                f"<p>⚠️ <code>.env.example</code> not found.<br>"
-                f"Create a file named <code>.env</code> with:<br>"
-                f"<code>API_BASE_URL=http://your-server:5000/api</code></p>"
-            )
-        
-        msg.setInformativeText(instructions)
-        msg.setStandardButtons(QMessageBox.Ok)
-        msg.exec()
-        
-        return False
-    
+    # This function kept for future use but doesn't block startup
+    # App works with hardcoded defaults from config.py
     return True
 
 
@@ -204,13 +161,9 @@ def main():
         int: Exit code (0 for success, non-zero for error)
     """
     try:
-        # Check if .env file exists BEFORE setting up logging
-        # (logging setup needs Config which needs .env)
-        if not check_env_file():
-            # No logger available yet, just exit
-            return 1
-        
-        # Set up logging (now .env is loaded)
+        # Note: .env file is now OPTIONAL
+        # App works with hardcoded defaults, .env only for customization
+        # Just set up logging with defaults
         setup_logging()
         
         logger = logging.getLogger(__name__)
